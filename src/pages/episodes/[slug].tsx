@@ -3,7 +3,6 @@ import ptBR from 'date-fns/locale/pt-BR'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
 import { api } from '../../services/api'
 import { convertDurationToTimeString } from '../../utils/convertDurationToTimeString'
 
@@ -30,9 +29,9 @@ export default function Episode({ episode }: EpisodeProps) {
         <div className={styles.episode}>
             <div className={styles.thumbnailContainer}>
                 <Link href="/">
-                <button type="button">
-                    <img src="/arrow-left.svg" alt="Voltar" />
-                </button>
+                    <button type="button">
+                        <img src="/arrow-left.svg" alt="Voltar" />
+                    </button>
                 </Link>
                 <Image
                     width={700}
@@ -44,7 +43,7 @@ export default function Episode({ episode }: EpisodeProps) {
                     <img src="/play.svg" alt="Tocar episódio" />
                 </button>
             </div>
-            
+
             <header>
                 <h1>{episode.title}</h1>
                 <span>{episode.members}</span>
@@ -62,9 +61,25 @@ export default function Episode({ episode }: EpisodeProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
+    const { data } = await api.get('episodes', {
+        params: {
+            _limit: 2,
+            _sort: 'published_at',
+            _order: 'desc',
+        },
+    })
+
+    const paths = data.map((episode) => {
+        return {
+            params: {
+                slug: episode.id,
+            },
+        }
+    })
+
     return {
-        paths: [],
-        fallback: 'blocking'
+        paths,
+        fallback: 'blocking',
     }
 }
 
